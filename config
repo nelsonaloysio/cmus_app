@@ -1,5 +1,12 @@
 [cmus_app]
-cmus_host = raspberry ;host running cmus (with --listen <host>)
-cmus_passwd = PaSsWd  ;cmus password (use :set passwd=<passwd>)
-app_host = localhost  ;host running web app
-app_port = 8080       ;port for web app
+cmus_host = raspberry        ;host running cmus (with --listen <host>)
+cmus_passwd = PaSsWd         ;cmus password (use :set passwd=<passwd>)
+app_host = localhost         ;host running web app
+app_port = 8080              ;port for web app
+serve_albumart = yes         ;wether or not to try to fetch and serve albumart from folder (works only if filepath is accessable)
+app_statusrefresh_f = 1000   ;ms to refresh status in browser when focused
+app_statusrefresh_o = 10000  ;ms to refresh status in browser when out of focus
+app_statusrefresh_s = 30000  ;ms to refresh status in browser when stopped
+app_statusrefresh_e = 600000 ;ms to refresh status in browser after connection error
+volume_change = 2            ;percentage of volume to change
+show_cmus_settings = no      ;wether or not to show cmus settings in details pane

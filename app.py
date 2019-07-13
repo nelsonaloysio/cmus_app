@@ -22,6 +22,7 @@ except ImportError:
     from ConfigParser import SafeConfigParser as ConfigParser
 from bottle import abort, post, request, response, route, run, view, static_file
 from sh import cmus_remote, ErrorReturnCode_1
+import os
 
 
 class ConfigFileNotFound(IOError):
@@ -44,7 +45,7 @@ def read_config(config_file):
     if not len(n):
         raise ConfigFileNotFound(config_file)
     section = 'cmus_app'
-    fields = ['cmus_host', 'cmus_passwd', 'app_host', 'app_port']
+    fields = ['cmus_host', 'cmus_passwd', 'app_host', 'app_port', 'serve_albumart', 'app_statusrefresh_f','app_statusrefresh_o','app_statusrefresh_s','app_statusrefresh_e','volume_change','show_cmus_settings']
     for field in fields:
         try:
             r[field] = config_parser.get(section, field)
@@ -53,23 +54,91 @@ def read_config(config_file):
     return r
 
 
+def get_cmus_status():
+    try:
+        #out = Remote('-Q').stdout.decode('utf-8').split('\n')
+        out = Remote('-Q').stdout.split('\n')
+        r = {'tag':{},'set':{}}
+        for i in out:
+            if i.startswith('tag') or i.startswith('set'):
+                k, v = i.split()[1], i.split()[2:]
+                if len(v): r[i.split()[0]][k] = ' '.join(v)
+            elif len(i):
+                k, v = i.split()[0], i.split(' ',1)[1]
+                if len(v): r[k] = v
+        return r
+    except ErrorReturnCode_1:
+        return false
+
+
+def get_full_status():
+    r = get_cmus_status()
+    if r != False:
+        #album art
+        if settings['serve_albumart'] == 'yes':
+            file_path = os.path.dirname(r['file'])
+            try:
+                foundimages = [fn for fn in os.listdir(file_path) if fn.lower().endswith(('.jpg','.jpeg','.jpe','.bmp','.png','.gif'))]
+                if len(foundimages) > 0:
+                    imgpriorities = ['cover','front','folder','albumart']
+                    foundimg = None
+                    for p in imgpriorities:
+                        i = [i for i in foundimages if p in i.lower()]
+                        if len(i)>0:
+                            foundimg = file_path+'/'+i[0]
+                            break
+                    if foundimg is None:
+                        foundimg = file_path+'/'+foundimages[0]
+                else:
+                    foundimg = False
+                r['albumart_file'] = foundimg
+            except:
+                r['albumart_file'] = False
+        else:
+            r['albumart_file'] = False
+
+        return r
+    else:
+        return false
+
+
+
+
 @route('/')
 @view('main')
 def index():
-    return {'host': settings['cmus_host']}
+    return {'host': settings['cmus_host'], 'app_statusrefresh_f': settings['app_statusrefresh_f'], 'app_statusrefresh_o': settings['app_statusrefresh_o'], 'app_statusrefresh_s': settings['app_statusrefresh_e'], 'app_statusrefresh_e': settings['app_statusrefresh_s'], 'show_cmus_settings': settings['show_cmus_settings']}
 
 
 @post('/cmd')
 def run_command():
+    command = request.POST.get('command', default=None)
+    param = request.POST.get('param', default=None)
     legal_commands = {'Play': 'player-play',
                       'Stop': 'player-stop',
+                      'Pause':'player-pause',
                       'Next': 'player-next',
                       'Previous': 'player-prev',
-                      'Increase Volume': 'vol +1%',
-                      'Reduce Volume': 'vol -1%',
-                      'Mute': 'vol 0'}
-    command = request.POST.get('command', default=None)
+                      'Increase Volume': 'vol +' + settings['volume_change'] + '%',
+                      'Reduce Volume': 'vol -' + settings['volume_change'] + '%',
+                      'Mute': 'vol 0',
+                      'toggle': ''}
     if command in legal_commands:
+        if command == 'Mute':
+            if param != None:
+                param = param.split('|')
+                if isinstance(param, list):
+                    if int(param[0]) >= 0 and int(param[0]) <= 100 and int(param[1]) >= 0 and int(param[1]) <= 100:
+                        legal_commands['Mute'] = 'vol ' + param[0] + '% ' + param[1] + '%'
+                    else:
+                        abort(400, 'Invalid command.')
+        if command == 'toggle':
+            legal_toggles = ['aaa_mode','shuffle','repeat','repeat_current']
+            if param in legal_toggles:
+                legal_commands['toggle'] = 'toggle '+param
+            else:
+                abort(400, 'Invalid command.')
+
         try:
             out = Remote('-C', legal_commands[command])
             return {'result': out.exit_code, 'output': out.stdout.decode()}
@@ -80,26 +149,41 @@ def run_command():
 
 
 @route('/status')
-def get_status():
-    try:
-        out = Remote('-Q').stdout.decode().split('\n')
-        r = {}
-        play = out[0].split()[1]
-        if play == 'playing':
-            r['playing'] = True
-        elif play == 'stopped':
-            r['playing'] = False
-        info = [i for i in out if i.startswith(('tag', 'set'))]
-        for i in info:
-            k, v = i.split()[1], i.split()[2:]
-            if len(v):
-                r[k] = ' '.join(v)
+def fetch_status():
+    s = get_cmus_status()
+    if s != False:
+        r = {'status': s['status'], 'position': s['position'], 'file': s['file']}
         return r
-    except ErrorReturnCode_1:
+    else:
         abort(503, 'Cmus not running.')
 
 
-@route('/static/<file>')
+@route('/fullstatus')
+def fetch_full_status():
+    r = get_full_status()
+    if r != False:
+        return r
+    else:
+        abort(503, 'Cmus not running.')
+
+
+#TODO: ajaxbrowser for files (extrat data from lib.pl?) for search and queue
+
+
+@route('/album_art/<file:re:.*\.(jpg|jpeg|jpe|bmp|png|gif)>')
+def album_art_file(file):
+    if settings['serve_albumart'] == 'yes':
+        status = get_full_status()
+        response.set_header('Cache-Control', 'max-age=604800')
+        if status['albumart_file'] == file:
+            return static_file(file, root='/')
+        else:
+            return static_file('noalbumart.png', root='static')
+    else:
+        return static_file('noalbumart.png', root='static')
+
+
+@route('/static/<file:path>')
 def static(file):
     response.set_header('Cache-Control', 'max-age=604800')
     return static_file(file, root='static')
