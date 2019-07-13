@@ -3,7 +3,7 @@
 # cmus-remote web app
 
 This is a web app to control a server instance of
-[`cmus`](https://cmus.github.io/), a powerful music player, remotely. It supports basic player, volume and mode controls, can fetch and show the albumart-image from current files folder and display all tags. but you can't add items to the playlist or managing the queue.
+[`cmus`](https://cmus.github.io/), a powerful music player, remotely. It supports basic player, volume and mode controls, can fetch and show the albumart-image from current files' folder and display all tags. But you can't add items to the playlist or manage the queue.
 
 ![Screenshot of cmus_app running in Firefox](cmus-app-screenshot.png)
 
