@@ -107,7 +107,13 @@ def get_full_status():
 @route('/')
 @view('main')
 def index():
-    return {'host': settings['cmus_host'], 'app_statusrefresh_f': settings['app_statusrefresh_f'], 'app_statusrefresh_o': settings['app_statusrefresh_o'], 'app_statusrefresh_s': settings['app_statusrefresh_e'], 'app_statusrefresh_e': settings['app_statusrefresh_s'], 'show_cmus_settings': settings['show_cmus_settings']}
+    return {'host': settings['cmus_host'],
+            'app_statusrefresh_f': settings['app_statusrefresh_f'],
+            'app_statusrefresh_o': settings['app_statusrefresh_o'],
+            'app_statusrefresh_s': settings['app_statusrefresh_e'],
+            'app_statusrefresh_e': settings['app_statusrefresh_s'],
+            'show_cmus_settings': settings['show_cmus_settings'],
+            'serve_albumart': settings['serve_albumart']}
 
 
 @post('/cmd')
@@ -167,7 +173,12 @@ def fetch_full_status():
         abort(503, 'Cmus not running.')
 
 
-#TODO: ajaxbrowser for files (extrat data from lib.pl?) for search and queue
+#TODO: show playlist, lib & queue
+#TODO: ajaxbrowser for files (extrat data from lib.pl?) 
+#TODO: search, play and queue from filelists
+#TODO: manipulate queue and playlist
+#nice2have: fun with cmus-filters!!!
+#nice2have: seek +/-, seek position % by statusbarclick.
 
 
 @route('/album_art/<file:re:.*\.(jpg|jpeg|jpe|bmp|png|gif)>')

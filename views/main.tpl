@@ -207,7 +207,7 @@
 
         if(response.duration > 0) {
             status.push('<span class="gray nobr">['+(response.status!=='stopped'?sec2str(response.position)+' / ':'')+sec2str(response.duration)+']</span>');
-            tit.push('<span class="nobr">['+(response.status!=='stopped'?sec2str(response.position)+' / ':'')+sec2str(response.duration)+']</span>');
+            tit.push('['+(response.status!=='stopped'?sec2str(response.position)+' / ':'')+sec2str(response.duration)+']');
         }
 
         if (response.status === 'paused') {
@@ -298,11 +298,12 @@
     function runCommand(command,param){
         var dt = {command: command};
         if(command==='Mute') {
-            if(parseInt(statusCurFullStatus.set.vol_left,10)+parseInt(statusCurFullStatus.set.vol_right,10)===0) { dt.param = statusLastVolume!==null ? statusLastVolume : '100|100'; }
+            if(parseInt(statusCurFullStatus.set.vol_left,10)+parseInt(statusCurFullStatus.set.vol_right,10)===0) { dt.param = statusLastVolume!==null ? statusLastVolume : '100|100'; command='Unmute'; }
             else { statusLastVolume = statusCurFullStatus.set.vol_left+'|'+statusCurFullStatus.set.vol_right; }
         }
         if(command==='toggle') {
             dt.param = param;
+            command += ' ' + param;
         }
         $.ajax({type: 'POST', url: '/cmd', data: dt, context: $("div#result"),
             error: function(response){
@@ -310,7 +311,7 @@
                 this.html(msg);
             },
             success: function(response){
-                var msg = '<p class="green label"><i class="fas fa-ok"></i> ' + command + '</p>';
+                var msg = '<p class="green label"><i class="fas fa-check"></i> ' + command + '</p>';
                 if (response.output) { msg += '<pre>' + response.output + '</pre>'; }
                 this.html(msg);
                 updateFullStatus();
@@ -389,6 +390,9 @@
         else { statusRefreshRate = {{app_statusrefresh_f}}; }
     }
     document.addEventListener('visibilitychange', setStatusRefreshrate, false);
+
+    //hide albumart-box if disabled
+    if('{{serve_albumart}}'!=='yes') { $("#album_art").hide(); }
 </script>
 </body>
 </html>
