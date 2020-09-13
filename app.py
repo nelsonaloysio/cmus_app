@@ -56,8 +56,7 @@ def read_config(config_file):
 
 def get_cmus_status():
     try:
-        #out = Remote('-Q').stdout.decode('utf-8').split('\n')
-        out = Remote('-Q').stdout.split('\n')
+        out = Remote('-Q').stdout.decode('utf-8').split('\n')
         r = {'tag':{},'set':{}}
         for i in out:
             if i.startswith('tag') or i.startswith('set'):
