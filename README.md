@@ -1,9 +1,11 @@
-[![AGPL](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/jboynyc/cmus_app/master/LICENSE)
+[![AGPL](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/ichier/cmus_app/master/LICENSE)
 
 # cmus-remote web app
 
 This is a web app to control a server instance of
 [`cmus`](https://cmus.github.io/), a powerful music player, remotely. It supports basic player, volume and mode controls, can fetch and show the albumart-image from current files' folder and display all tags. But you can't add items to the playlist or manage the queue.
+
+If you wnat to run the webserver and cmus itself in backgound and optionally automatically on system-startup check out [`cmusd`](https://github.com/ichier/cmus_daemon)!
 
 ![Screenshot of cmus_app running in Firefox](cmus-app-screenshot.png)
 
@@ -35,7 +37,7 @@ or a different one, but both hosts will have to have `cmus` installed.
 
 - Fetch cmus_app:
 
-        $ git clone git://github.com/jboynyc/cmus_app
+        $ git clone git://github.com/ichier/cmus_app
         $ cd cmus_app
 
 - Edit the configuration file. (Optional.)

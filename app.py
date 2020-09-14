@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 '''
-https://github.com/jboynyc/cmus_app
+https://github.com/ichier/cmus_app
+forked from now retired https://github.com/jboynyc/cmus_app
 '''
 # =======================================================================
 #   This program is free software: you can redistribute it and/or modify
@@ -173,11 +174,15 @@ def fetch_full_status():
 
 
 #TODO: show playlist, lib & queue
-#TODO: ajaxbrowser for files (extrat data from lib.pl?) 
+#TODO: ajaxbrowser for files (extract data from lib.pl?) 
 #TODO: search, play and queue from filelists
 #TODO: manipulate queue and playlist
-#nice2have: fun with cmus-filters!!!
 #nice2have: seek +/-, seek position % by statusbarclick.
+#nice2have: commandline (see pull-request #4) but only optional, since its a big security-issue - verynice2have: shortcut : for cmdline-focus ;)
+#nice2have: browser-stored display-settings (hide buttons or stuff like seek, pause, mute, albumart, volume, repeat, repeat1, cmus set in details etc.)
+#nice2have: fun with cmus-filters!!!
+#nice2have: when in playlistmode: display x of z, when in queuemode display sth like queue: 4
+#nice2have: finally themes ;) (=cssfiles, swichable and strred in browser, too)
 
 
 @route('/album_art/<file:re:.*\.(jpg|jpeg|jpe|bmp|png|gif)>')
