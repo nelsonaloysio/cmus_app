@@ -68,7 +68,7 @@ def get_cmus_status():
                 if len(v): r[k] = v
         return r
     except ErrorReturnCode_1:
-        return false
+        return False
 
 
 def get_full_status():
@@ -99,7 +99,7 @@ def get_full_status():
 
         return r
     else:
-        return false
+        return False
 
 
 
